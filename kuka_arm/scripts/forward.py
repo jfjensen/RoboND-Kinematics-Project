@@ -4,6 +4,7 @@ import numpy as np
 from numpy import array
 from sympy import symbols, cos, sin, pi, simplify, sqrt, atan2
 from sympy.matrices import Matrix
+import tf
 
 q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
 d1, d2, d3, d4, d5, d6, d7 = symbols('d1:8')
@@ -66,11 +67,11 @@ T6_G = T6_G.subs(s)
 
 
 T0_2 = simplify(T0_1 * T1_2)
-T0_3 = simplify(T1_2 * T2_3)
-T0_4 = simplify(T2_3 * T3_4)
-T0_5 = simplify(T3_4 * T4_5)
-T0_6 = simplify(T4_5 * T5_6)
-T0_G = simplify(T5_6 * T6_G)
+T0_3 = simplify(T0_2 * T2_3)
+T0_4 = simplify(T0_3 * T3_4)
+T0_5 = simplify(T0_4 * T4_5)
+T0_6 = simplify(T0_5 * T5_6)
+T0_G = simplify(T0_6 * T6_G)
 
 # print(T0_2)
 # print(T0_3)
@@ -79,10 +80,10 @@ T0_G = simplify(T5_6 * T6_G)
 # print(T0_6)
 # print(T0_G)
 
-print(simplify(T0_1 * T1_2 * T2_3))
+# print(simplify(T0_1 * T1_2 * T2_3))
 
 
-print(simplify(T0_1 * T1_2 * T2_3 * T3_4))
+# print(simplify(T0_1 * T1_2 * T2_3 * T3_4))
 
 
 R_z = Matrix([[ cos(pi),-sin(pi), 0, 0],
@@ -90,8 +91,8 @@ R_z = Matrix([[ cos(pi),-sin(pi), 0, 0],
               [       0,       0, 1, 0],
               [       0,       0, 0, 1]])
 
-R_y = Matrix([[ cos(-pi/2), 0,-sin(-pi/2), 0],
-			  [          0, 1,          0, 0],
+R_y = Matrix([[ cos(-pi/2), 0, sin(-pi/2), 0],
+			        [          0, 1,          0, 0],
               [-sin(-pi/2), 0, cos(-pi/2), 0],
               [          0, 0,          0, 1]])
 
@@ -102,9 +103,32 @@ R_corr = simplify(R_z * R_y)
 # print("T0_3 = ", T0_3.evalf(subs={q1: 0, q2:0, q3: 0, q4: 0, q5: 0, q6: 0}))
 # print("T0_4 = ", T0_4.evalf(subs={q1: 0, q2:0, q3: 0, q4: 0, q5: 0, q6: 0}))
 # print("T0_5 = ", T0_5.evalf(subs={q1: 0, q2:0, q3: 0, q4: 0, q5: 0, q6: 0}))
-# print("T0_6 = ", T0_6.evalf(subs={q1: 0, q2:0, q3: 0, q4: 0, q5: 0, q6: 0}))
-# print("T0_G = ", T0_G.evalf(subs={q1: 0, q2:0, q3: 0, q4: 0, q5: 0, q6: 0}))
+
+val1 = -1.30
+val2 = -0.14
+val3 = -0.32
+val4 = 0.73
+val5 = -1.99
+val6 = -1.75
+
+# T0_6_eval = T0_6.evalf(subs={q1: val1, q2: val2, q3: val3, q4: val4, q5: val5, q6: val6})
+# T0_G_eval = T0_G.evalf(subs={q1: val1, q2: val2, q3: val3, q4: val4, q5: val5, q6: val6})
+
+# translation = tf.transformations.translation_from_matrix(np.array(T0_6_eval).astype(np.float64))
+# rotation = tf.transformations.quaternion_from_matrix(np.array(T0_6_eval).astype(np.float64))
+
+# translation = tf.transformations.translation_from_matrix(np.array(T0_G_eval).astype(np.float64))
+# rotation = tf.transformations.quaternion_from_matrix(np.array(T0_G_eval).astype(np.float64))
+
+# # print("T0_6 = ", T0_6_eval)
+# print("T0_G = ", T0_G_eval)
+# print(translation)
+# print(rotation)
 
 
 T_total = simplify(T0_G * R_corr)
-
+T_total_eval = T_total.evalf(subs={q1: val1, q2: val2, q3: val3, q4: val4, q5: val5, q6: val6})
+translation = tf.transformations.translation_from_matrix(np.array(T_total_eval).astype(np.float64))
+rotation = tf.transformations.quaternion_from_matrix(np.array(T_total_eval).astype(np.float64))
+print(translation)
+print(rotation)
