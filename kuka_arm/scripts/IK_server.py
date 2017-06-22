@@ -91,36 +91,34 @@ def handle_calculate_IK(req):
                 tf.transformations.translation_matrix((px,py,pz)),
                 tf.transformations.quaternion_matrix((req.poses[x].orientation.x, req.poses[x].orientation.y, req.poses[x].orientation.z, req.poses[x].orientation.w)))
             # print(target_matrix)
+
+            ### theta 1 ###########################################################################
             theta1 = atan2(py,px)
 
-            P_2_4_K0 = Matrix([[px - (d6*target_matrix[0,2]) - a1*cos(theta1)],
-                               [py - (d6*target_matrix[1,2]) - a1*sin(theta1)],
-                               [pz - (d6*target_matrix[2,2]) - d1]])
+            P_2_4_K0 = Matrix([[px - (d7*target_matrix[0,2]) - a1*cos(theta1)],
+                               [py - (d7*target_matrix[1,2]) - a1*sin(theta1)],
+                               [pz - (d7*target_matrix[2,2]) - d1]])
             P_2_4_K0 = P_2_4_K0.subs(s)
             P_2_4_K0_norm = np.linalg.norm(P_2_4_K0)
-            l1 = d4 ##################################################################
-            phi_1 = asin(((l1*l1)-(a2*a2)+(P_2_4_K0_norm*P_2_4_K0_norm))/(2*P_2_4_K0_norm*l1))
-            phi_1 = phi_1.subs(s)
-            phi_2 = asin((P_2_4_K0_norm - (((l1*l1) - (a2*a2) + (P_2_4_K0_norm*P_2_4_K0_norm))/(2*P_2_4_K0_norm)))/a2)
-            phi_2 = phi_2.subs(s)
-            # theta3 = pi - (phi_1 + phi_2) - atan2(-d4, a3)
-            theta3 = pi - (phi_1 + phi_2) + atan2(-d4, a3)            
-            theta3 = theta3.subs(s)
 
-            target_matrix_R = target_matrix[:3,:3]
-            P_2_4_K2 = (target_matrix_R.T)*P_2_4_K0
-            beta1 = atan2(P_2_4_K2[0],P_2_4_K2[1])
-            beta2_1 = asin(((a2*a2) - (P_2_4_K0_norm*P_2_4_K0_norm) + (l1*l1))/(2*l1*a2))
-            beta2_1 = beta2_1.subs(s)
-            beta2_2 = asin((l1 - (((a2*a2) - (P_2_4_K0_norm*P_2_4_K0_norm) + (l1*l1))/(2*l1)))/P_2_4_K0_norm)
-            beta2_2 = beta2_2.subs(s)
-            # theta2 = (pi/2) - (abs(beta1) + (beta2_1 + beta2_2))
-            # theta2 =  - (abs(beta1) + (beta2_1 + beta2_2))
-            # theta2 =  - (pi/2) + (abs(beta1) - (beta2_1 + beta2_2))
-            theta2 =  ((pi/2) - (beta1 + (beta2_1 + beta2_2)))*0.5
+            l1 = sqrt((d4*d4) + (a3*a3))
+            l1 = l1.subs(s)
+            l1_sq = l1*l1
+        
+            ### theta 3 ###########################################################################
+            theta3_beta = acos((l1_sq + (a2*a2) - (P_2_4_K0_norm*P_2_4_K0_norm))/(2*l1*a2))
+            theta3 = -(theta3_beta) + atan2(d4, a3)
+            theta3 = theta3.subs(s)
+      
+            ### theta 2 ###########################################################################
+            theta2_beta = atan2(P_2_4_K0[2], sqrt((P_2_4_K0[0]*P_2_4_K0[0])+(P_2_4_K0[1]*P_2_4_K0[1])))
+           
+            theta2_alpha = acos(((P_2_4_K0_norm*P_2_4_K0_norm) + (a2*a2) - l1_sq)/(2*P_2_4_K0_norm*a2))
+            theta2 =  (pi/2) - (theta2_beta + theta2_alpha)
+            
             
             theta2 = theta2.subs(s)
-
+            
 
             print("theta1: " + str(theta1) + " theta2: " + str(theta2) + " theta3: " + str(theta3))
             # Populate response for the IK request
