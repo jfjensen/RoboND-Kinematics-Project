@@ -57,12 +57,12 @@ def handle_calculate_IK(req):
             
             # Define Modified DH Transformation matrix
             R_z = Matrix([[ cos(pi),-sin(pi), 0, 0],
-              [ sin(pi), cos(pi), 0, 0],
-              [       0,       0, 1, 0],
-              [       0,       0, 0, 1]])
+                          [ sin(pi), cos(pi), 0, 0],
+                          [       0,       0, 1, 0],
+                          [       0,       0, 0, 1]])
 
             R_y = Matrix([[ cos(-pi/2), 0, sin(-pi/2), 0],
-                                [          0, 1,          0, 0],
+                          [          0, 1,          0, 0],
                           [-sin(-pi/2), 0, cos(-pi/2), 0],
                           [          0, 0,          0, 1]])
 
@@ -71,6 +71,32 @@ def handle_calculate_IK(req):
 
             # Create individual transformation matrices
 
+            # T0_1 = Matrix([[             cos(q1),            -sin(q1),            0,              a0],
+            #                [ sin(q1)*cos(alpha0), cos(q1)*cos(alpha0), -sin(alpha0), -sin(alpha0)*d1],
+            #                [ sin(q1)*sin(alpha0), cos(q1)*sin(alpha0),  cos(alpha0),  cos(alpha0)*d1],
+            #                [                   0,                   0,            0,               1]])
+            # T0_1 = T0_1.subs(s)
+
+            # T1_2 = Matrix([[             cos(q2),            -sin(q2),            0,              a1],
+            #                [ sin(q2)*cos(alpha1), cos(q2)*cos(alpha1), -sin(alpha1), -sin(alpha1)*d2],
+            #                [ sin(q2)*sin(alpha1), cos(q2)*sin(alpha1),  cos(alpha1),  cos(alpha1)*d2],
+            #                [                   0,                   0,            0,               1]])
+            # T1_2 = T1_2.subs(s)
+
+            # T2_3 = Matrix([[             cos(q3),            -sin(q3),            0,              a2],
+            #                [ sin(q3)*cos(alpha2), cos(q3)*cos(alpha2), -sin(alpha2), -sin(alpha2)*d3],
+            #                [ sin(q3)*sin(alpha2), cos(q3)*sin(alpha2),  cos(alpha2),  cos(alpha2)*d3],
+            #                [                   0,                   0,            0,               1]])
+            # T2_3 = T2_3.subs(s)
+
+            # T0_3 = simplify(T0_1 * T1_2 * T2_3)
+            # R0_3 = T0_3[:3,:3]
+            # print("R0_3: " + str(R0_3))
+            #R0_3 = R0_3.subs(s)
+
+            R0_3 = Matrix([[sin(q2 + q3)*cos(q1), cos(q1)*cos(q2 + q3), -sin(q1)],
+                           [sin(q1)*sin(q2 + q3), sin(q1)*cos(q2 + q3),  cos(q1)],
+                           [        cos(q2 + q3),        -sin(q2 + q3),        0]])
 
             
             # Extract end-effector position and orientation from request
@@ -100,38 +126,31 @@ def handle_calculate_IK(req):
                                                         req.poses[x].orientation.y, 
                                                         req.poses[x].orientation.z, 
                                                         req.poses[x].orientation.w)))
-            print(R0_6)
-            print(R_corr)
-            R0_6_corr = R0_6 * R_corr.T
+            # print(R0_6)
+            # print(R_corr)
+            R0_6_corr = R_corr.T * R0_6 #* R_corr.T
+            
+            # R0_6_corr = R0_6 * R_corr**-1
 
             ### theta 1 ###########################################################################
             theta1 = atan2(py,px)
-
-            # WC = Matrix([[px - (s[d7]*target_matrix[0,2])],
-            #              [py - (s[d7]*target_matrix[1,2])],
-            #              [pz - (s[d7]*target_matrix[2,2])]])
-
-
+  
             WC = Matrix([[px - (s[d7]*R0_6_corr[0,2])],
                          [py - (s[d7]*R0_6_corr[1,2])],
                          [pz - (s[d7]*R0_6_corr[2,2])]])
 
-            print("WC: " + str(WC))
-
+  
             T0_2 = Matrix([[s[a1]*cos(theta1)],
                            [s[a1]*sin(theta1)],
                            [s[d1]]])
 
             g = WC - T0_2
 
-            print("g: " + str(g))
-
+      
             g_norm = sqrt(g[0]**2 + g[1]**2 + g[2]**2)
 
             l = sqrt((s[d4]**2) + (s[a3]**2))
-                        
-
-            print("g_norm: " + str(g_norm) + " l: " + str(l) + " a2: " + str(s[a2]))
+      
         
             ### theta 3 ###########################################################################
             
@@ -148,21 +167,25 @@ def handle_calculate_IK(req):
             
             theta2_phi = atan2(sqrt(1 - theta2_D**2),theta2_D)
 
-            # D_test = ((g_norm**2) + (l**2) - (s[a2]**2))/(2*g_norm*l)
-            
-            # phi_test = atan2(sqrt(1 - D_test**2),D_test)
-
-            # print(str(theta2_phi + theta3_phi + phi_test))
-
             theta2_beta = atan2(g[2], sqrt((g[0]**2)+(g[1]**2)))
             
-            # print("theta2_beta: " + str(theta2_beta) + " theta2_phi: " + str(theta2_phi))
-            
             theta2 =  (pi/2) - theta2_phi - theta2_beta
-            # theta2 = theta2.subs(s)
+
+
+            ### theta 4-5-6 #######################################################################
+
+            R3_6 = R0_3.T * R0_6[:3,:3]
+            R3_6 = R3_6.evalf(subs={q1:theta1, q2:theta2, q3:theta3})
             
+            theta4 = atan2(R3_6[2,1], R3_6[2,2])
+            theta5 = atan2(-R3_6[2,0], sqrt(R3_6[0,0]**2 + R3_6[1,0]**2))
+            theta6 = atan2(R3_6[1,0], R3_6[0,0])
+                        
 
             print("theta1: " + str(theta1) + " theta2: " + str(theta2) + " theta3: " + str(theta3))
+            print("theta4: " + str(theta4) + " theta5: " + str(theta5) + " theta6: " + str(theta6))
+            # print("theta4_b: " + str(theta4_b) + " theta5_b: " + str(theta5_b) + " theta6_b: " + str(theta6_b))
+
             # Populate response for the IK request
             # In the next line replace theta1,theta2...,theta6 by your joint angle variables
     	    joint_trajectory_point.positions = [theta1, theta2, theta3, theta4, theta5, theta6]
