@@ -92,7 +92,7 @@ def handle_calculate_IK(req):
             # T0_3 = simplify(T0_1 * T1_2 * T2_3)
             # R0_3 = T0_3[:3,:3]
             # print("R0_3: " + str(R0_3))
-            #R0_3 = R0_3.subs(s)
+            
 
             R0_3 = Matrix([[sin(q2 + q3)*cos(q1), cos(q1)*cos(q2 + q3), -sin(q1)],
                            [sin(q1)*sin(q2 + q3), sin(q1)*cos(q2 + q3),  cos(q1)],
@@ -114,30 +114,21 @@ def handle_calculate_IK(req):
 
             print("p: " + str(px) + " " + str(py) +  " " + str(pz))
      
-            # Calculate joint angles using Geometric IK method
-            target_matrix = tf.transformations.concatenate_matrices(
-                tf.transformations.translation_matrix((px,py,pz)),
-                tf.transformations.quaternion_matrix((req.poses[x].orientation.x, req.poses[x].orientation.y, req.poses[x].orientation.z, req.poses[x].orientation.w)))
-            # print(target_matrix)
-            # print(target_matrix[0,2])
-            # print(target_matrix[1,2])
-            # print(target_matrix[2,2])
+            
             R0_6 = Matrix(tf.transformations.quaternion_matrix((req.poses[x].orientation.x, 
                                                         req.poses[x].orientation.y, 
                                                         req.poses[x].orientation.z, 
                                                         req.poses[x].orientation.w)))
-            # print(R0_6)
-            # print(R_corr)
-            R0_6_corr = R_corr.T * R0_6 #* R_corr.T
-            
-            # R0_6_corr = R0_6 * R_corr**-1
+                     
 
             ### theta 1 ###########################################################################
             theta1 = atan2(py,px)
   
-            WC = Matrix([[px - (s[d7]*R0_6_corr[0,2])],
-                         [py - (s[d7]*R0_6_corr[1,2])],
-                         [pz - (s[d7]*R0_6_corr[2,2])]])
+            ix=0
+
+            WC = Matrix([[px - (s[d7]*R0_6[0,ix])],
+                         [py - (s[d7]*R0_6[1,ix])],
+                         [pz - (s[d7]*R0_6[2,ix])]])
 
   
             T0_2 = Matrix([[s[a1]*cos(theta1)],
@@ -175,12 +166,13 @@ def handle_calculate_IK(req):
             ### theta 4-5-6 #######################################################################
 
             R3_6 = R0_3.T * R0_6[:3,:3]
+            
             R3_6 = R3_6.evalf(subs={q1:theta1, q2:theta2, q3:theta3})
             
             theta4 = atan2(R3_6[2,1], R3_6[2,2])
             theta5 = atan2(-R3_6[2,0], sqrt(R3_6[0,0]**2 + R3_6[1,0]**2))
             theta6 = atan2(R3_6[1,0], R3_6[0,0])
-                        
+                       
 
             print("theta1: " + str(theta1) + " theta2: " + str(theta2) + " theta3: " + str(theta3))
             print("theta4: " + str(theta4) + " theta5: " + str(theta5) + " theta6: " + str(theta6))
