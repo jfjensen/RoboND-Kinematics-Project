@@ -4,20 +4,10 @@
 ---
 
 
-**Steps to complete the project:**  
 
+[//]: # "Image References"
 
-1. Set up your ROS Workspace.
-2. Download or clone the [project repository](https://github.com/udacity/RoboND-Kinematics-Project) into the ***src*** directory of your ROS Workspace.  
-3. Experiment with the forward_kinematics environment and get familiar with the robot.
-4. Launch in [demo mode](https://classroom.udacity.com/nanodegrees/nd209/parts/7b2fd2d7-e181-401e-977a-6158c77bf816/modules/8855de3f-2897-46c3-a805-628b5ecf045b/lessons/91d017b1-4493-4522-ad52-04a74a01094c/concepts/ae64bb91-e8c4-44c9-adbe-798e8f688193).
-5. Perform Kinematic Analysis for the robot following the [project rubric](https://review.udacity.com/#!/rubrics/972/view).
-6. Fill in the `IK_server.py` with your Inverse Kinematics code. 
-
-
-[//]: # (Image References)
-
-[image1]: ./misc_images/misc1.png
+[image1]: ./misc_images/arm_calc.png
 [image2]: ./misc_images/misc2.png
 [image3]: ./misc_images/misc3.png
 
@@ -25,33 +15,139 @@
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
-### Writeup / README
-
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
-
-You're reading it!
-
 ### Kinematic Analysis
 #### 1. Run the forward_kinematics demo and evaluate the kr210.urdf.xacro file to perform kinematic analysis of Kuka KR210 robot and derive its DH parameters.
 
-Here is an example of how to include an image in your writeup.
+This is the table containing the Modified DH parameters.
 
-![alt text][image1]
+
+| $\mathbf i$ | $\mathbf \alpha_{i-1}$ | $\mathbf a_{i-1}$ | $\mathbf d_i$ | $\mathbf \theta_{i}$                 |
+| ----------- | ---------------------- | ----------------- | ------------- | ------------------------------------ |
+| 1           | 0                      | 0                 | 0.75          |                                      |
+| 2           | $-\frac{\pi}{2}$       | 0.35              | 0             | $\theta_2 = \theta_2 -\frac{\pi}{2}$ |
+| 3           | 0                      | 1.25              | 0             |                                      |
+| 4           | $-\frac{\pi}{2}$       | -0.054            | 1.50          |                                      |
+| 5           | $\frac{\pi}{2}$        | 0                 | 0             |                                      |
+| 6           | $-\frac{\pi}{2}$       | 0                 | 0             |                                      |
+| 7           | 0                      | 0                 | 0.303         | $\theta_7 = 0$                       |
 
 #### 2. Using the DH parameter table you derived earlier, create individual transformation matrices about each joint. In addition, also generate a generalized homogeneous transform between base_link and gripper_link using only end-effector(gripper) pose.
 
-Here's | A | Snappy | Table
---- | --- | --- | ---
-1 | `highlight` | **bold** | 7.41
-2 | a | b | c
-3 | *italic* | text | 403
-4 | 2 | 3 | abcd
+$$
+T^0_1 = \begin{bmatrix}
+			cos(\theta_1)& -sin(\theta_1)& 0& 0 \\
+			sin(\theta_1)& cos(\theta_1)& 0& 0 \\
+			0& 0& 1& 0.75 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^1_2 = \begin{bmatrix}
+			sin(\theta_2)& cos(\theta_2)& 0& 0.35 \\
+			0& 0& 1& 0 \\
+			cos(\theta_2)& -sin(\theta_2)& 0& 0 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^2_3 = \begin{bmatrix}
+			cos(\theta_3)& -sin(\theta_3)& 0& 1.25 \\
+			sin(\theta_3)& cos(\theta_3)& 0& 0 \\
+			0& 0& 1& 0 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^3_4 = \begin{bmatrix}
+			cos(\theta_4)& -sin(\theta_4)& 0& -0.054 \\
+			0& 0& 1& 1.50 \\
+			-sin(\theta_4)& -cos(\theta_4)& 0& 0 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^4_5 = \begin{bmatrix}
+			cos(\theta_5)& -sin(\theta_5)& 0& 0 \\
+			0& 0& -1& 0 \\
+			sin(\theta_5)& cos(\theta_5)& 0& 0 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^5_6 = \begin{bmatrix}
+			cos(\theta_6)& -sin(\theta_6)& 0& 0 \\
+			0& 0& 1& 0 \\
+			-sin(\theta_6)& -cos(\theta_6)& 0& 0 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+$$
+T^6_G = \begin{bmatrix}
+			1& 0& 0& 0 \\
+			0& 1& 0& 0 \\
+			0& 0& 1& 0.303 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
 
 #### 3. Decouple Inverse Kinematics problem into Inverse Position Kinematics and inverse Orientation Kinematics; doing so derive the equations to calculate all individual joint angles.
 
-And here's another image! 
+![alt text][image1]
 
-![alt text][image2]
+First we need to calculate the Wrist Center vector $WC$.
+$$
+WC = \begin{bmatrix} p_x \\ p_y \\ p_z \end{bmatrix} - d_7 \dot{} R^0_6 \dot{}\begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}
+\implies 
+\begin{cases} 
+WC_x = p_x - (d_7 \dot{} n_x) \\
+WC_y = p_y - (d_7 \dot{} n_y)\\
+WC_z = p_z - (d_7 \dot{} n_z)
+\end{cases}
+$$
+Now that we have the $WC$, calculating $\theta_1$ is fairly trivial.
+$$
+\theta_1 = atan2(WC_y,WC_x)
+$$
+
+Before calculating $\theta_2$ and $\theta_3$ we need to calculate the length of the sides of the triangle $[a_2,l,g]$:
+$$
+\\
+l = \sqrt{a^2_3 + d^2_4} \\
+\\
+g = WC - t^0_2 = WC - \begin{bmatrix} a_1 \dot{} cos(\theta_1) \\ a_1 \dot{} sin(\theta_1) \\ d_1 \end{bmatrix} \\
+\\
+|g|=\sqrt{g_x^2 + g_y^2 +g_z^2 }
+$$
+Using the cosine rule...
+$$
+A^2 = B^2 + C^2 - 2BCcos(\alpha) \\
+\alpha = arccos \left(\frac{B^2 + C^2 - A^2}{2BC} \right)\\
+$$
+... and the conversion into $atan2$ as follows ...
+$$
+arccos(x) = atan2(\sqrt{1-x^2},x)\\
+$$
+We can now start finding $\theta_3​$:
+$$
+\varphi = atan2(d_4, a_3) \\
+D = \left(\frac{ l^2 + a^2_2 - |g|^2}{2la_2}\right) \\
+\delta = atan2(\sqrt{1-D^2},D) \\
+\theta_3 = \varphi - \delta
+$$
+And also $\theta_2$:
+$$
+g_{xy} = \sqrt{g_x^2 + g_y^2}\\
+\alpha = atan2(g_z,g_{xy}) \\
+D = \left(\frac{|g|^2 + a^2_2  - l^2}{2|g|a_2}\right) \\
+\beta = atan2(\sqrt{1-D^2},D) \\
+\theta_2 = \frac{\pi}{2} - \alpha - \beta
+$$
 
 ### Project Implementation
 
@@ -61,7 +157,6 @@ And here's another image!
 Here I'll talk about the code, what techniques I used, what worked and why, where the implementation might fail and how I might improve it if I were going to pursue this project further.  
 
 
-And just for fun, another example image:
-![alt text][image3]
+
 
 

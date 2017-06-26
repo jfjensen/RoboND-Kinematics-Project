@@ -4,7 +4,7 @@ import numpy as np
 from numpy import array
 from sympy import symbols, cos, sin, pi, simplify, sqrt, atan2
 from sympy.matrices import Matrix
-import tf
+#import tf
 
 q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
 d1, d2, d3, d4, d5, d6, d7 = symbols('d1:8')
@@ -66,15 +66,32 @@ T6_G = Matrix([[             cos(q7),            -sin(q7),            0,        
 T6_G = T6_G.subs(s)
 
 
-T0_2 = simplify(T0_1 * T1_2)
-T0_3 = simplify(T0_2 * T2_3)
+# print(T0_1)
+# print(T1_2)
+# print(T2_3)
+# print(T3_4)
+# print(T4_5)
+# print(T5_6)
+# print(T6_G)
+
+# Matrix([[cos(q1), -sin(q1), 0, 0], [sin(q1), cos(q1), 0, 0], [0, 0, 1, 0.75], [0, 0, 0, 1]])
+# Matrix([[sin(q2), cos(q2), 0, 0.35], [0, 0, 1, 0], [cos(q2), -sin(q2), 0, 0], [0, 0, 0, 1]])
+# Matrix([[cos(q3), -sin(q3), 0, 1.25], [sin(q3), cos(q3), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+# Matrix([[cos(q4), -sin(q4), 0, -0.054], [0, 0, 1, 1.50], [-sin(q4), -cos(q4), 0, 0], [0, 0, 0, 1]])
+# Matrix([[cos(q5), -sin(q5), 0, 0], [0, 0, -1, 0], [sin(q5), cos(q5), 0, 0], [0, 0, 0, 1]])
+# Matrix([[cos(q6), -sin(q6), 0, 0], [0, 0, 1, 0], [-sin(q6), -cos(q6), 0, 0], [0, 0, 0, 1]])
+# Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.303], [0, 0, 0, 1]])
+
+# T0_2 = simplify(T0_1 * T1_2)
+# T0_3 = simplify(T0_2 * T2_3)
 # T0_4 = simplify(T0_3 * T3_4)
 # T0_5 = simplify(T0_4 * T4_5)
 # T0_6 = simplify(T0_5 * T5_6)
 # T0_G = simplify(T0_6 * T6_G)
 
-print(T0_2)
-print(T0_3)
+# print(T0_1)
+# print(T0_2)
+# print(T0_3)
 # print(T0_4)
 # print(T0_5)
 # print(T0_6)
