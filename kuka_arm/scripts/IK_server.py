@@ -123,6 +123,7 @@ def handle_calculate_IK(req):
 
 
             print("p: " + str(px) + " " + str(py) +  " " + str(pz))
+            print("roll: " + str(roll) + " pitch: " + str(pitch) + " yaw: " + str(yaw))
      
             
             R0_6 = Matrix(tf.transformations.quaternion_matrix((req.poses[x].orientation.x, 
@@ -183,13 +184,15 @@ def handle_calculate_IK(req):
 
             ### theta 4-5-6 #######################################################################
 
-            R3_6 = R0_3.T * R0_6_corr[:3,:3]
+            R3_6 = R0_3.T * R0_6[:3,:3]
+            # print(R3_6)
             
             R3_6 = R3_6.evalf(subs={q1:theta1, q2:theta2, q3:theta3})
+            # print(R3_6)
             
-            theta4 = atan2(-R3_6[2,1], R3_6[2,2])
-            theta5 = atan2(R3_6[2,0], sqrt(R3_6[0,0]**2 + R3_6[1,0]**2))
-            theta6 = atan2(-R3_6[1,0], R3_6[0,0])
+            theta4 = atan2(R3_6[2,1], R3_6[2,2])
+            theta5 = atan2(-R3_6[2,0], sqrt(R3_6[0,0]**2 + R3_6[1,0]**2))
+            theta6 = atan2(R3_6[1,0], R3_6[0,0])
 
                        
 
