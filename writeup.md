@@ -7,7 +7,7 @@
 
 [//]: # "Image References"
 
-[image1]: ./misc_images/arm_calc.png
+[image1]: file://C:\Users\JFJ\Documents\GitHub\RobotND\RoboND-Kinematics-Project/misc_images/arm_calc.jpg
 [image2]: ./misc_images/misc2.png
 [image3]: ./misc_images/misc3.png
 
