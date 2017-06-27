@@ -82,12 +82,12 @@ T6_G = T6_G.subs(s)
 # Matrix([[cos(q6), -sin(q6), 0, 0], [0, 0, 1, 0], [-sin(q6), -cos(q6), 0, 0], [0, 0, 0, 1]])
 # Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.303], [0, 0, 0, 1]])
 
-# T0_2 = simplify(T0_1 * T1_2)
-# T0_3 = simplify(T0_2 * T2_3)
-# T0_4 = simplify(T0_3 * T3_4)
-# T0_5 = simplify(T0_4 * T4_5)
-# T0_6 = simplify(T0_5 * T5_6)
-# T0_G = simplify(T0_6 * T6_G)
+T0_2 = simplify(T0_1 * T1_2)
+T0_3 = simplify(T0_2 * T2_3)
+T0_4 = simplify(T0_3 * T3_4)
+T0_5 = simplify(T0_4 * T4_5)
+T0_6 = simplify(T0_5 * T5_6)
+T0_G = simplify(T0_6 * T6_G)
 
 # print(T0_1)
 # print(T0_2)
@@ -95,7 +95,7 @@ T6_G = T6_G.subs(s)
 # print(T0_4)
 # print(T0_5)
 # print(T0_6)
-# print(T0_G)
+print(T0_G)
 
 # print(simplify(T0_1 * T1_2 * T2_3))
 
@@ -129,6 +129,7 @@ val5 = -1.99
 val6 = -1.75
 
 # T0_6_eval = T0_6.evalf(subs={q1: val1, q2: val2, q3: val3, q4: val4, q5: val5, q6: val6})
+T0_G_eval = T0_G.subs({q1: val1, q2: val2, q3: val3})
 # T0_G_eval = T0_G.evalf(subs={q1: val1, q2: val2, q3: val3, q4: val4, q5: val5, q6: val6})
 
 # translation = tf.transformations.translation_from_matrix(np.array(T0_6_eval).astype(np.float64))
@@ -138,7 +139,7 @@ val6 = -1.75
 # rotation = tf.transformations.quaternion_from_matrix(np.array(T0_G_eval).astype(np.float64))
 
 # # print("T0_6 = ", T0_6_eval)
-# print("T0_G = ", T0_G_eval)
+print("T0_G = ", T0_G_eval)
 # print(translation)
 # print(rotation)
 

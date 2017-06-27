@@ -121,25 +121,34 @@ def handle_calculate_IK(req):
                     req.poses[x].orientation.z, req.poses[x].orientation.w])
 
 
+            
+            R_roll = Matrix([[ 1,         0,         0, 0],
+                             [ 0, cos(roll),-sin(roll), 0],
+                             [ 0, sin(roll), cos(roll), 0],
+                             [ 0,         0,         0, 1]])
 
+            R_pitch = Matrix([[ cos(pitch), 0,  sin(pitch), 0],
+                              [          0, 1,           0, 0],
+                              [-sin(pitch), 0,  cos(pitch), 0],
+                              [          0, 0,           0, 1]])
+
+            R_yaw = Matrix([[ cos(yaw), -sin(yaw), 0, 0],
+                            [ sin(yaw),  cos(yaw), 0, 0],
+                            [        0,         0, 1, 0],
+                            [        0,         0, 0, 1]])
+
+            R0_6 = simplify(R_yaw * R_pitch * R_roll)
+
+           
             print("p: " + str(px) + " " + str(py) +  " " + str(pz))
             print("roll: " + str(roll) + " pitch: " + str(pitch) + " yaw: " + str(yaw))
      
-            
-            R0_6 = Matrix(tf.transformations.quaternion_matrix((req.poses[x].orientation.x, 
-                                                        req.poses[x].orientation.y, 
-                                                        req.poses[x].orientation.z, 
-                                                        req.poses[x].orientation.w)))
-                     
+                                           
             R0_6_corr = R0_6 * R_corr
-            ### theta 1 ###########################################################################
-            
-  
-            # ix=0
 
-            # WC = Matrix([[px - (s[d7]*R0_6[0,ix])],
-            #              [py - (s[d7]*R0_6[1,ix])],
-            #              [pz - (s[d7]*R0_6[2,ix])]])
+           
+            ### theta 1 ###########################################################################
+           
 
             ix=2
 
@@ -184,18 +193,15 @@ def handle_calculate_IK(req):
 
             ### theta 4-5-6 #######################################################################
 
-            R3_6 = R0_3.T * R0_6[:3,:3]
-            # print(R3_6)
-            
+            R3_6 = R0_3.T * R0_6[:3,:3] 
+                       
             R3_6 = R3_6.evalf(subs={q1:theta1, q2:theta2, q3:theta3})
-            # print(R3_6)
-            
+                       
             theta4 = atan2(R3_6[2,1], R3_6[2,2])
             theta5 = atan2(-R3_6[2,0], sqrt(R3_6[0,0]**2 + R3_6[1,0]**2))
             theta6 = atan2(R3_6[1,0], R3_6[0,0])
 
-                       
-
+   
             print("theta1: " + str(theta1) + " theta2: " + str(theta2) + " theta3: " + str(theta3))
             print("theta4: " + str(theta4) + " theta5: " + str(theta5) + " theta6: " + str(theta6))
 
