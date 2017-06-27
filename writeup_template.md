@@ -40,15 +40,15 @@ T^0_1 = \begin{bmatrix}
 			0& 0& 1& 0.75 \\
 			0& 0& 0& 1
 		\end{bmatrix}
-$$
 
-$$
 T^1_2 = \begin{bmatrix}
 			sin(\theta_2)& cos(\theta_2)& 0& 0.35 \\
 			0& 0& 1& 0 \\
 			cos(\theta_2)& -sin(\theta_2)& 0& 0 \\
 			0& 0& 0& 1
 		\end{bmatrix}
+		
+\notag
 $$
 
 $$
@@ -58,15 +58,14 @@ T^2_3 = \begin{bmatrix}
 			0& 0& 1& 0 \\
 			0& 0& 0& 1
 		\end{bmatrix}
-$$
 
-$$
 T^3_4 = \begin{bmatrix}
 			cos(\theta_4)& -sin(\theta_4)& 0& -0.054 \\
 			0& 0& 1& 1.50 \\
 			-sin(\theta_4)& -cos(\theta_4)& 0& 0 \\
 			0& 0& 0& 1
 		\end{bmatrix}
+\notag
 $$
 
 $$
@@ -76,15 +75,14 @@ T^4_5 = \begin{bmatrix}
 			sin(\theta_5)& cos(\theta_5)& 0& 0 \\
 			0& 0& 0& 1
 		\end{bmatrix}
-$$
 
-$$
 T^5_6 = \begin{bmatrix}
 			cos(\theta_6)& -sin(\theta_6)& 0& 0 \\
 			0& 0& 1& 0 \\
 			-sin(\theta_6)& -cos(\theta_6)& 0& 0 \\
 			0& 0& 0& 1
 		\end{bmatrix}
+\notag
 $$
 
 $$
@@ -92,6 +90,56 @@ T^6_G = \begin{bmatrix}
 			1& 0& 0& 0 \\
 			0& 1& 0& 0 \\
 			0& 0& 1& 0.303 \\
+			0& 0& 0& 1
+		\end{bmatrix}
+$$
+
+
+Given the target orientation $roll$, $pitch$ and $yaw$ we have the following rotation matrices:
+$$
+R_{roll} = \begin{bmatrix}
+1 & 0 & 0 \\
+0 & cos(roll) & -sin(roll) \\
+0 & sin(roll) & cos(roll)
+\end{bmatrix}
+\\
+R_{pitch} = \begin{bmatrix}
+cos(pitch) & 0 & sin(pitch) \\
+0 & 1 & 0 \\
+-sin(pitch)& 0 & cos(pitch)
+\end{bmatrix}
+\\
+R_{yaw} = \begin{bmatrix}
+cos(yaw) & -sin(yaw)& 0 \\
+sin(yaw) & cos(yaw) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\\
+\notag
+$$
+And thus:
+$$
+R^0_6 = R_{yaw} \dot{} R_{pitch} \dot{} R_{roll} = 
+\begin{bmatrix}
+			l_x & m_x & n_x \\
+			l_y & m_y & n_y\\
+			l_z & m_z & n_z
+\end{bmatrix}
+$$
+Given also the target position $p_x$, $p_y$ and $p_z$ , the complete target matrix can now be defined as follows:
+
+$$
+T^0_G = \left[
+\begin{array}{c|c}
+R^0_6 & \begin{matrix}p_x \\ p_y \\ p_z \end{matrix} \\
+\hline
+0 & 1
+\end{array}
+\right] = 
+\begin{bmatrix}
+			l_x & m_x & n_x & p_x \\
+			l_y & m_y & n_y & p_y \\
+			l_z & m_z & n_z & p_z \\
 			0& 0& 0& 1
 		\end{bmatrix}
 $$
@@ -120,7 +168,7 @@ $$
 \\
 l = \sqrt{a^2_3 + d^2_4} \\
 \\
-g = WC - t^0_2 = WC - \begin{bmatrix} a_1 \dot{} cos(\theta_1) \\ a_1 \dot{} sin(\theta_1) \\ d_1 \end{bmatrix} \\
+g = WC - t^0_2 = WC - \begin{bmatrix} a_1 \dot{} cos(\theta_1) \\ a_1 \dot{} sin(\theta_1) \\ d_1 \end{bmatrix} =  \begin{bmatrix} g_x \\ g_y \\ g_z \end{bmatrix} \\
 \\
 |g|=\sqrt{g_x^2 + g_y^2 +g_z^2 }
 $$
@@ -128,12 +176,14 @@ Using the cosine rule...
 $$
 A^2 = B^2 + C^2 - 2BCcos(\alpha) \\
 \alpha = arccos \left(\frac{B^2 + C^2 - A^2}{2BC} \right)\\
+\notag
 $$
 ... and the conversion into $atan2$ as follows ...
 $$
 arccos(x) = atan2(\sqrt{1-x^2},x)\\
+\notag
 $$
-We can now start finding $\theta_3​$:
+We can now start finding $\theta_3$:
 $$
 \varphi = atan2(d_4, a_3) \\
 D = \left(\frac{ l^2 + a^2_2 - |g|^2}{2la_2}\right) \\
@@ -147,6 +197,18 @@ g_{xy} = \sqrt{g_x^2 + g_y^2}\\
 D = \left(\frac{|g|^2 + a^2_2  - l^2}{2|g|a_2}\right) \\
 \beta = atan2(\sqrt{1-D^2},D) \\
 \theta_2 = \frac{\pi}{2} - \alpha - \beta
+$$
+
+Now we can proceed to the Inverse Orientation Kinematics.
+
+$$
+R^3_6 = (R^0_3)^T \dot{} R^0_6 
+= \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
+$$
+$$
+\theta_4 = atan2(r_{32}, r_{33})\\
+\theta_5 = atan2(-r_{31}, \sqrt{r_{11}^2 + r_{21}^2})\\
+\theta_6 = atan2(r_{21},r_{11})
 $$
 
 ### Project Implementation
