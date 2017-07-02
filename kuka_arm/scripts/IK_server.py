@@ -7,8 +7,6 @@
 #
 # All Rights Reserved.
 
-# Author: Harsh Pandya
-
 # import modules
 import rospy
 import tf

@@ -3,15 +3,15 @@
 
 
 [//]: # "Image References"
-
 [image1]: file://C:\Users\JFJ\Documents\GitHub\RobotND\RoboND-Kinematics-Project/misc_images/arm_calc.jpg
-[image2]: ./misc_images/misc2.png
-[image3]: ./misc_images/misc3.png
+[image2]: file://C:\Users\JFJ\Documents\GitHub\RobotND\RoboND-Kinematics-Project/misc_images/arm_schematic.jpg
 
 ## Kinematic Analysis
 ### 1. Run the forward_kinematics demo and evaluate the kr210.urdf.xacro file to perform kinematic analysis of Kuka KR210 robot and derive its DH parameters.
 
-This is the table containing the Modified DH parameters.
+![alt text][image2]
+
+
 
 
 | $\mathbf i$ | $\mathbf \alpha_{i-1}$ | $\mathbf a_{i-1}$ | $\mathbf d_i$ | $\mathbf \theta_{i}$                 |
@@ -23,6 +23,8 @@ This is the table containing the Modified DH parameters.
 | 5           | $\frac{\pi}{2}$        | 0                 | 0             |                                      |
 | 6           | $-\frac{\pi}{2}$       | 0                 | 0             |                                      |
 | 7           | 0                      | 0                 | 0.303         | $\theta_7 = 0$                       |
+
+Above is the table containing the Modified DH parameters.
 
 ### 2. Using the DH parameter table you derived earlier, create individual transformation matrices about each joint. In addition, also generate a generalized homogeneous transform between base_link and gripper_link using only end-effector(gripper) pose.
 
@@ -223,17 +225,51 @@ $$
 \end{cases}
 $$
 
+
+
 ## Project Implementation
 
 ### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
+#### Target Rotation Matrix and DH Correction
+The target rotation matrix `R0_6` as is described in eqs. $(2)$ is implemented in lines 119-140.
 
-Here I'll talk about the code, what techniques I used, what worked and why, where the implementation might fail and how I might improve it if I were going to pursue this project further.  
+In my code I also implemented a correction step for the target rotation matrix `R0_6`. This is done by first creating a Modified DH transformation matrix `R_corr` in lines 58-69. After that the target rotation matrix `R0_6` is multiplied with this matrix in line 147.
+
+
+#### Inverse Position Kinematics
+
+In the lines 150-193, I have implemented the inverse position kinematics.
+
+First the code for computing  `theta1`  is implemented in lines 150-159 as described in equations $(4)$ and $(5)$ .
+
+Then some helper variables which are described in equation $(6)$ are calculated in lines 162-171. These will be used in the following two steps.
+
+The `theta3` angle as described in equation $(7)$  is computed in lines 174-180 and the `theta2` angle as described in equation $(8)$  is computed in lines 185-191.
+
+#### Inverse Orientation Kinematics
+
+The angles `theta4` , `theta5` and  `theta6` are computed in lines 196-207 as described in equations $(11)$ and $(12)$ .
+
+#### Results
+
+The robot arm successfully grasps the items on the shelf. The gripper is always oriented properly towards the items and is also correctly oriented when releasing the items into the bucket. When moving from start position to end position the gripper does like to rotate around a lot, but this is less of an issue given that the arm does not hit anything and it correctly grasps the items and correctly drops them. The downside of the excessive rotation of the gripper is that it takes a little more time than would otherwise be needed to carry out the movements.
+
+Possibly the implementation could be improved with additional code making sure that the angles stay within the limits which are mentioned in the URDF description. In addition there might be some uncaught singularities or other mathematical quirks that have been overlooked, but in the tests I did, these did not show up.
 
 ## References
+Bringing a standard 6-Axis industry robot into FreeCAD for simulation. [link](https://www.freecadweb.org/wiki/Robot_6-Axis)
+
+Kuka. KR 210-2 - KR 210 L180-2 - KR 210 L150-2 Technical Data. [PDF](http://free-cad.svn.sourceforge.net/viewvc/free-cad/trunk/src/Mod/Robot/Lib/Kuka/kr_210_2.pdf)
+
+Milford Robotics. Theory videos for Introduction to Robotics ENB339. [Youtube Playlist](https://www.youtube.com/playlist?list=PLB46C8B9857C32201)
+
+Piotrowski, Norbert and Barylski, Adam. Modelling a 6-DOF manipulator using Matlab software. [PDF](http://atmia.put.poznan.pl/Woluminy/Fil/ATMiA_34_3_5.pdf)
+
 [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points from The Udacity Robot Nano Degree program.
 
+Slabaugh, Gregory. Computing Euler angles from a rotation matrix. [PDF](http://www.staff.city.ac.uk/~sbbh653/publications/euler.pdf)
 
+Wikipedia. Inverse Trigonometric Functions. [link](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions)
 
-
-
+Wikipedia. Atan2. [link](https://en.wikipedia.org/wiki/Atan2)
