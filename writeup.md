@@ -1,7 +1,4 @@
-## Project: Kinematics Pick & Place
-### Writeup Template: You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
+# Project: Kinematics Pick & Place
 
 
 
@@ -11,12 +8,8 @@
 [image2]: ./misc_images/misc2.png
 [image3]: ./misc_images/misc3.png
 
-## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
-
----
-### Kinematic Analysis
-#### 1. Run the forward_kinematics demo and evaluate the kr210.urdf.xacro file to perform kinematic analysis of Kuka KR210 robot and derive its DH parameters.
+## Kinematic Analysis
+### 1. Run the forward_kinematics demo and evaluate the kr210.urdf.xacro file to perform kinematic analysis of Kuka KR210 robot and derive its DH parameters.
 
 This is the table containing the Modified DH parameters.
 
@@ -31,7 +24,7 @@ This is the table containing the Modified DH parameters.
 | 6           | $-\frac{\pi}{2}$       | 0                 | 0             |                                      |
 | 7           | 0                      | 0                 | 0.303         | $\theta_7 = 0$                       |
 
-#### 2. Using the DH parameter table you derived earlier, create individual transformation matrices about each joint. In addition, also generate a generalized homogeneous transform between base_link and gripper_link using only end-effector(gripper) pose.
+### 2. Using the DH parameter table you derived earlier, create individual transformation matrices about each joint. In addition, also generate a generalized homogeneous transform between base_link and gripper_link using only end-effector(gripper) pose.
 
 $$
 T^0_1 = \begin{bmatrix}
@@ -144,9 +137,11 @@ R^0_6 & \begin{matrix}p_x \\ p_y \\ p_z \end{matrix} \\
 		\end{bmatrix}
 $$
 
-#### 3. Decouple Inverse Kinematics problem into Inverse Position Kinematics and inverse Orientation Kinematics; doing so derive the equations to calculate all individual joint angles.
+### 3. Decouple Inverse Kinematics problem into Inverse Position Kinematics and inverse Orientation Kinematics; doing so derive the equations to calculate all individual joint angles.
 
 ![alt text][image1]
+
+#### Inverse Position Kinematics
 
 First we need to calculate the Wrist Center vector $WC$.
 $$
@@ -199,24 +194,44 @@ D = \left(\frac{|g|^2 + a^2_2  - l^2}{2|g|a_2}\right) \\
 \theta_2 = \frac{\pi}{2} - \alpha - \beta
 $$
 
-Now we can proceed to the Inverse Orientation Kinematics.
+#### Inverse Orientation Kinematics
 
+Given our target matrix $R^0_6$ and $R^0_3$ created using $\theta_1$, $\theta_2$ and $\theta_3$ we can find $R^3_6$:
 $$
 R^3_6 = (R^0_3)^T \dot{} R^0_6 
 = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
 $$
+From the Forward Kinematics we can also find the following:
 $$
-\theta_4 = atan2(r_{32}, r_{33})\\
-\theta_5 = atan2(-r_{31}, \sqrt{r_{11}^2 + r_{21}^2})\\
-\theta_6 = atan2(r_{21},r_{11})
+R^3_6 = \left[ \begin{smallmatrix} -sin(\theta_4)*sin(\theta_6) + cos(\theta_4)*cos(\theta_5)*cos(\theta_6) & -sin(\theta_4)*cos(\theta_6) - sin(\theta_6)*cos(\theta_4)*cos(\theta_5)& sin(\theta_5)*cos(\theta_4) \\ sin(\theta_5)*cos(\theta_6) & -sin(\theta_5)*sin(\theta_6) & cos(\theta_5)\\ -sin(\theta_4)*cos(\theta_5)*cos(\theta_6) - sin(\theta_6)*cos(\theta_4)& sin(\theta_4)*sin(\theta_6)*cos(\theta_5) - cos(\theta_4)*cos(\theta_6)& sin(\theta_4)*sin(\theta_5) \end{smallmatrix} \right]
 $$
 
-### Project Implementation
+So, first we calculate $\theta_5$:
+$$
+\theta_5 = atan2(\sqrt{r_{13}^2 + r_{33}^2}, r_{23})\\
+$$
+This gives us 2 two possibilities:
+$$
+\text{if } sin(\theta_5) < 0
+\begin{cases} \theta_4 = atan2(-r_{33}, r_{13})  \\
+\theta_6 = atan2(r_{22},-r_{21})\\
+\end{cases} \\
+ \text{if } sin(\theta_5) \geq 0
+ \begin{cases}
+\theta_4 = atan2(r_{33},-r_{13})\\
+\theta_6 = atan2(-r_{22},r_{21})\\
+\end{cases}
+$$
 
-#### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
+## Project Implementation
+
+### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
 
 Here I'll talk about the code, what techniques I used, what worked and why, where the implementation might fail and how I might improve it if I were going to pursue this project further.  
+
+## References
+[Rubric](https://review.udacity.com/#!/rubrics/972/view) Points from The Udacity Robot Nano Degree program.
 
 
 
