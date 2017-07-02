@@ -203,7 +203,7 @@ $$
 R^3_6 = (R^0_3)^T \dot{} R^0_6 
 = \begin{bmatrix} r_{11} & r_{12} & r_{13} \\ r_{21} & r_{22} & r_{23} \\ r_{31} & r_{32} & r_{33} \end{bmatrix}
 $$
-From the Forward Kinematics we can also find the following:
+From the Forward Kinematics (see RobotArm.html in repo) we can also find the following:
 $$
 R^3_6 = \left[ \begin{smallmatrix} -sin(\theta_4)*sin(\theta_6) + cos(\theta_4)*cos(\theta_5)*cos(\theta_6) & -sin(\theta_4)*cos(\theta_6) - sin(\theta_6)*cos(\theta_4)*cos(\theta_5)& sin(\theta_5)*cos(\theta_4) \\ sin(\theta_5)*cos(\theta_6) & -sin(\theta_5)*sin(\theta_6) & cos(\theta_5)\\ -sin(\theta_4)*cos(\theta_5)*cos(\theta_6) - sin(\theta_6)*cos(\theta_4)& sin(\theta_4)*sin(\theta_6)*cos(\theta_5) - cos(\theta_4)*cos(\theta_6)& sin(\theta_4)*sin(\theta_5) \end{smallmatrix} \right]
 $$
